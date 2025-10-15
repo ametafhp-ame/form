@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WhatsApp Form — Fill & Send</title>
+  <style>
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f6f8fa;margin:0}
+    .card{background:#fff;padding:24px;border-radius:12px;box-shadow:0 6px 24px rgba(20,20,40,0.06);width:100%;max-width:480px}
+    h1{margin:0 0 8px;font-size:20px}
+    label{display:block;margin-top:12px;font-size:14px}
+    input,textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid #e3e6ea;margin-top:6px;font-size:14px}
+    .row{display:flex;gap:8px}
+    .row > *{flex:1}
+    button{margin-top:16px;padding:12px 16px;border-radius:10px;border:0;background:#25D366;color:#fff;font-weight:600;cursor:pointer}
+    .small{font-size:13px;color:#556; margin-top:8px}
+  </style>
+</head>
+<body>
+  <form class="card" id="waForm">
+    <h1>Quick Form — send to WhatsApp</h1>
+    <p class="small">Fill this form and it will open WhatsApp with a prefilled message. The user must press Send in WhatsApp to complete.</p>
+
+    <label for="name">Name</label>
+    <input id="name" name="name" required />
+
+    <label for="email">Email (optional)</label>
+    <input id="email" name="email" type="email" />
+
+    <label for="phone">Phone (optional)</label>
+    <input id="phone" name="phone" type="tel" />
+
+    <label for="service">Service / Topic</label>
+    <select id="service" name="service">
+      <option value="General Inquiry">General Inquiry</option>
+      <option value="Order">Order</option>
+      <option value="Support">Support</option>
+    </select>
+
+    <label for="message">Message</label>
+    <textarea id="message" name="message" rows="4" placeholder="Write your message..."></textarea>
+
+    <label for="sendTo">Send to WhatsApp number</label>
+    <input id="sendTo" name="sendTo" placeholder="e.g. 919812345678 (include country code)" required />
+
+    <div class="row">
+      <button type="submit">Open WhatsApp →</button>
+    </div>
+
+    <p class="small">Tip: If you want the form to simply open WhatsApp without a fixed number, leave the number blank and the message will open in WhatsApp Web/mobile ready to choose recipient.</p>
+  </form>
+
+  <script>
+    // When hosting, edit behavior: you can pre-fill the sendTo input with your number.
+    const form = document.getElementById('waForm');
+
+    function urlEncode(s){
+      return encodeURIComponent(s).replace(/%20/g, '+');
+    }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+
+      const data = new FormData(form);
+      const name = data.get('name') || '';
+      const email = data.get('email') || '';
+      const phone = data.get('phone') || '';
+      const service = data.get('service') || '';
+      const message = data.get('message') || '';
+      const sendTo = (data.get('sendTo') || '').replace(/[\s+-]/g,'');
+
+      // Build the message text that will appear in WhatsApp
+      let text = `Name: ${name}\nService: ${service}`;
+      if(email) text += `\nEmail: ${email}`;
+      if(phone) text += `\nPhone: ${phone}`;
+      if(message) text += `\nMessage: ${message}`;
+
+      const encoded = encodeURIComponent(text);
+
+      // If a number provided, open wa.me/<number>?text=<encoded>
+      // Otherwise open generic wa.me/?text=<encoded>
+      const base = sendTo ? `https://wa.me/${sendTo}` : 'https://wa.me/';
+      const url = `${base}?text=${encoded}`;
+
+      // Open in new tab/window (works on mobile & desktop). User must press Send in WhatsApp.
+      window.open(url, '_blank');
+    });
+  </script>
+</body>
+</html>
